@@ -11,7 +11,7 @@
     "mysql2": "^3.3.3",
     "sequelize": "^6.32.0"
   },
-  "name": "backend",
+  "name": "eksflorasi-api",
   "version": "1.0.0",
   "main": "app.js",
   "scripts": {
