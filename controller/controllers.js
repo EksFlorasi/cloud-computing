@@ -47,10 +47,10 @@ const registerUser = async (req, res) => {
       email: req.body.email,
     },
   });
-  if (emailUsed.length !== 0) return res.status(400).json({ msg: 'Email is already in use!' });
+  if (emailUsed) return res.status(400).json({ msg: 'Email is already in use!' });
 
   // Check if password and confirm password match
-  if (req.bodypassword !== req.bodyconfirm) return res.status(400).json({ msg: 'Password and Confirm Password should match' });
+  if (req.body.password !== req.body.confirm) return res.status(400).json({ msg: 'Password and Confirm Password should match' });
 
   // Hash password
   const salt = await bcrypt.genSalt();
@@ -277,9 +277,13 @@ const userRank = async (req, res) => {
 
   // Highlight user
   for (let data of results) {
-    if (data.id == req.user_id) data.highlight = true
-    else data.highlight = false
-    delete data.id
+    if (data.user_id === req.user.user_id) {
+      data.highlight = true;
+    }
+    else {
+      data.highlight = false;
+    }
+    delete data.user_id;
   }
 
   res.send({ rank: results });
