@@ -263,7 +263,7 @@ const userDashboard = async (req, res) => {
 const userRank = async (req, res) => {
   // Show user's total points and rank
   const [results, metadata] = await sequelize.query(
-    `SELECT u.user_id, u.name, act.total_point
+    `SELECT u.user_id, u.name, a.avatar_url, act.total_point
     FROM user u LEFT JOIN 
       (SELECT ac.user_id, SUM(at.point_value) as total_point
       FROM action_completed ac
@@ -274,6 +274,8 @@ const userRank = async (req, res) => {
       AND CURDATE() + INTERVAL (6 - WEEKDAY(CURDATE())) DAY
       GROUP BY ac.user_id) AS act
     ON u.user_id = act.user_id
+    LEFT JOIN avatar a
+    ON u.avatar_id = a.avatar_id
     WHERE u.location_id = ${req.user.location_id}
     ORDER BY act.total_point DESC;`,
   );
@@ -358,7 +360,7 @@ const uploadCollection = async (req, res) => {
   const bucketName = 'user-upload-collection';
 
   // Generate a new unique file name
-  const fileName = `${Date.now()}-${originalname}-${req.user.name}`;
+  const fileName = `${Date.now()}-${req.user.name}-${originalname}`;
 
   const bucket = storage.bucket(bucketName);
   const fileUpload = bucket.file(fileName);
@@ -371,13 +373,15 @@ const uploadCollection = async (req, res) => {
 
   const publicUrl = `https://storage.googleapis.com/${bucketName}/${fileName}`;
 
-  // Move the file to the destination directory
-  // fs.renameSync(path, filePath);
+  // Image Classification
 
-  // Handle the uploaded file as needed
-  // For example, you can further process, manipulate, or persist the file here
-
-  return res.json({ message: 'Image uploaded successfully', publicUrl });
+  // Check for result's label
+  if (classificationResult !== '') {
+    const checkLabel = await collection.findAll({
+      attributes: [''],
+      where: { label: classificationResult },
+    });
+  }
 };
 
 module.exports = {
