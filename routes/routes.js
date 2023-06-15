@@ -1,4 +1,5 @@
 const express = require('express');
+const multer = require('multer');
 const {
   registerUser,
   getCollection,
@@ -10,6 +11,7 @@ const {
   userEditProfile,
   userDashboard,
   userRank,
+  uploadCollection,
 } = require('../controller/controllers');
 const { authenticateToken } = require('../middleware/auth-jwt');
 
@@ -44,5 +46,9 @@ router.get('/collections', authenticateToken, getCollection);
 
 // Get Collection Detail
 router.get('/collections/:object_id', authenticateToken, getCollectionDetail);
+
+// Upload Collection
+const upload = multer();
+router.post('/collections', upload.single('picture'), authenticateToken, uploadCollection);
 
 module.exports = { router };

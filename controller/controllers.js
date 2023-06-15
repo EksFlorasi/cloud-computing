@@ -1,8 +1,11 @@
 const bcrypt = require('bcrypt');
 const { Op } = require('sequelize');
+const multer = require('multer');
+const fs = require('fs');
+const libPath = require('path');
+const { Storage } = require('@google-cloud/storage');
 const { generateAccessToken } = require('../middleware/auth-jwt');
 const sequelize = require('../config/database');
-// const formatDate = require('../middleware/date');
 const {
   user,
   location,
@@ -12,7 +15,7 @@ const {
   tip,
 } = require('../config/database').models;
 
-// Show list of regions in Indonesia
+// Show Indonesia Region List
 const showRegions = async (req, res) => {
   const locationList = await location.findAll({
     raw: true,
@@ -22,7 +25,7 @@ const showRegions = async (req, res) => {
   res.send({ locations: locationList });
 };
 
-// Show list of avatars
+// Show Avatar List
 const showAvatars = async (req, res) => {
   const avatarList = await avatar.findAll({
     raw: true,
@@ -32,7 +35,7 @@ const showAvatars = async (req, res) => {
   res.send({ avatars: avatarList });
 };
 
-// User registration
+// User Registration
 const registerUser = async (req, res) => {
   // Check if there's an empty field
   if (!req.body.name
@@ -56,7 +59,7 @@ const registerUser = async (req, res) => {
   const salt = await bcrypt.genSalt();
   const hashpassword = await bcrypt.hash(req.body.password, salt);
 
-  // Insert User credentials in database
+  // Insert user credentials in database
   try {
     const userExist = await user.create({
       name: req.body.name,
@@ -82,7 +85,7 @@ const registerUser = async (req, res) => {
   }
 };
 
-// User login
+// User Login
 const userSignin = async (req, res) => {
   // Check if email or password fields are empty
   if (req.body.email.trim() === '' || req.body.password.trim() === '') return res.status(400).json({ msg: 'Email or password must not be empty' });
@@ -106,7 +109,7 @@ const userSignin = async (req, res) => {
   return res.status(200).json({ msg: 'Logged in successfully', token });
 };
 
-// Get user profile
+// Get User Profile
 const userProfile = async (req, res) => {
   // Find the user data from token
   const getUser = await user.findOne({
@@ -134,7 +137,7 @@ const userProfile = async (req, res) => {
   res.send({ profile: getUser });
 };
 
-// Edit user profile
+// Edit User Profile
 const userEditProfile = async (req, res) => {
   // Check if any fields are empty
   if (!req.body.name
@@ -204,7 +207,7 @@ const userDashboard = async (req, res) => {
     },
   });
 
-  // Show user's total points and rank
+  // Show User's Total Points and Rank
   const [results, metadata] = await sequelize.query(
     `SELECT u.user_id, u.name, act.total_point
     FROM user u LEFT JOIN 
@@ -289,7 +292,7 @@ const userRank = async (req, res) => {
   res.send({ rank: results });
 };
 
-// Get collection
+// Get Collection
 const getCollection = async (req, res) => {
   // Get the parameter from the url
   const { category } = req.query;
@@ -313,7 +316,7 @@ const getCollection = async (req, res) => {
   res.send(collectionList);
 };
 
-// Get collection detail
+// Get Collection Detail
 const getCollectionDetail = async (req, res) => {
   // Get all collection associated with user
   const collectionDetail = await object.findAll({
@@ -333,6 +336,50 @@ const getCollectionDetail = async (req, res) => {
   res.send(collectionDetail);
 };
 
+// Upload Collection
+const uploadCollection = async (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'No image file provided' });
+
+  // Access the uploaded file details
+  const {
+    originalname,
+    mimetype,
+    size,
+    path,
+  } = req.file;
+
+  // Define the destination directory to store the file temporarily
+  const storage = new Storage({
+    projectId: 'eksflorasi-dev-c23-pr499',
+    keyFilename: './keys/eksflorasi-dev-c23-pr499-b9cc1e29a0f4.json',
+  });
+
+  // Set bucket name
+  const bucketName = 'user-upload-collection';
+
+  // Generate a new unique file name
+  const fileName = `${Date.now()}-${originalname}-${req.user.name}`;
+
+  const bucket = storage.bucket(bucketName);
+  const fileUpload = bucket.file(fileName);
+
+  await fileUpload.save(req.file.buffer, {
+    metadata: {
+      contentType: mimetype,
+    },
+  });
+
+  const publicUrl = `https://storage.googleapis.com/${bucketName}/${fileName}`;
+
+  // Move the file to the destination directory
+  // fs.renameSync(path, filePath);
+
+  // Handle the uploaded file as needed
+  // For example, you can further process, manipulate, or persist the file here
+
+  return res.json({ message: 'Image uploaded successfully', publicUrl });
+};
+
 module.exports = {
   showRegions,
   showAvatars,
@@ -344,4 +391,5 @@ module.exports = {
   userRank,
   getCollection,
   getCollectionDetail,
+  uploadCollection,
 };
