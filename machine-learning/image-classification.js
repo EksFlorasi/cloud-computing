@@ -1,13 +1,15 @@
 // TensorFlow
-const tf = require("@tensorflow/tfjs-node")
+const tf = require("@tensorflow/tfjs-node");
 const fs = require("fs");
-const axios = require("axios")
+const axios = require("axios");
+
+const probabilityThreshold = 0.75;
 
 // Read image from url
 const readImage = async url => {
-  const response = await axios.get(url,  { responseType: 'arraybuffer' })
-  const buffer = Buffer.from(response.data, "utf-8")
-  return buffer
+  const response = await axios.get(url,  { responseType: 'arraybuffer' });
+  const buffer = Buffer.from(response.data, "utf-8");
+  return buffer;
 }
 
 // Crop image (to use with multiple file formats)
@@ -30,13 +32,13 @@ const imageClassification = async (path, isFlora) => {
 
   // Branching to select paths and image size
   if (isFlora) {
-      modelPath = "file://deployment/image-recognition-js/flora_model/flower16_91/model.json"
-      labelPath = "./deployment/image-recognition-js/assets/flora_labels.txt"
-      imageSize = [225, 225]
+      modelPath = "file://deployment/image-recognition-js/flora_model/flower16_91/model.json";
+      labelPath = "./deployment/image-recognition-js/assets/flora_labels.txt";
+      imageSize = [225, 225];
   } else  {
       modelPath = "file://deployment/image-recognition-js/fauna_model/model.json";
-      labelPath = "./deployment/image-recognition-js/assets/fauna_labels.txt"
-      imageSize = [225, 225]
+      labelPath = "./deployment/image-recognition-js/assets/fauna_labels.txt";
+      imageSize = [225, 225];
   }
 
   // Load model and label based on chosen classification
@@ -44,7 +46,7 @@ const imageClassification = async (path, isFlora) => {
   const chosenLabel = fs.readFileSync(labelPath, "utf-8").split("\r\n");
 
   // Get image from file system
-  let imgBuf = await readImage(path)
+  let imgBuf = await readImage(path);
   imgBuf = tf.node.decodeImage(imgBuf);
 
   // Preprocess the image to fit the model
@@ -58,8 +60,8 @@ const imageClassification = async (path, isFlora) => {
   // Predict the image
   const predictions = await chosenModel.predict(image).data();
   
-  // Summarize to top 5 predictions
-  const top5 = Array.from(predictions)
+  // Summarize to top 3 predictions
+  const top3 = Array.from(predictions)
       .map(function(p, i) {
         return {
           probability: p,
@@ -67,9 +69,17 @@ const imageClassification = async (path, isFlora) => {
         };
       }).sort(function (a, b) {
         return b.probability - a.probability;
-      }).slice(0,5);
+      }).slice(0,3);
+  
+  // for debugging
+  // console.log(top3)
 
-  return top5;
+  // Branch to determine final result
+  if (top3[0].probability >= probabilityThreshold) {
+    return top3[0].label;
+  } else {
+    return "";
+  }
 }
 
 module.exports = {imageClassification};
