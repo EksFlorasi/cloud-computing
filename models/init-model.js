@@ -4,6 +4,7 @@ const actionTemp = require('./action-type');
 const avatarTemp = require('./avatar');
 const locationTemp = require('./location');
 const objectTemp = require('./object');
+const collectionTemp = require('./collection');
 const userTemp = require('./user');
 const tipTemp = require('./tip');
 
@@ -13,6 +14,7 @@ function initModels(sequelize) {
   const avatar = avatarTemp(sequelize, DataTypes);
   const location = locationTemp(sequelize, DataTypes);
   const object = objectTemp(sequelize, DataTypes);
+  const collection = collectionTemp(sequelize, DataTypes);
   const user = userTemp(sequelize, DataTypes);
   const tip = tipTemp(sequelize, DataTypes);
 
@@ -104,6 +106,7 @@ function initModels(sequelize) {
     location,
     object,
     user,
+    collection,
     tip,
   };
 }

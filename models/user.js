@@ -26,6 +26,7 @@ module.exports = function (sequelize, DataTypes) {
       },
       streak: {
         type: DataTypes.INTEGER,
+        defaultValue: 0,
       },
     },
     {

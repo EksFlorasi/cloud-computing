@@ -12,8 +12,11 @@ const {
   avatar,
   object,
   action_type,
+  action_completed,
   tip,
+  collection,
 } = require('../config/database').models;
+// const imageClassification = require('../machine-learning/image-classification');
 
 // Show Indonesia Region List
 const showRegions = async (req, res) => {
@@ -373,14 +376,181 @@ const uploadCollection = async (req, res) => {
 
   const publicUrl = `https://storage.googleapis.com/${bucketName}/${fileName}`;
 
+  // Check the type of collection
+  // const { isFlora } = req.body; // If Fauna, isFlora = false
+
   // Image Classification
+  // const classificationResult = imageClassification(publicUrl, isFlora);
 
   // Check for result's label
+  const classificationResult = 'cat';
   if (classificationResult !== '') {
-    const checkLabel = await collection.findAll({
-      attributes: [''],
-      where: { label: classificationResult },
+    const query = `SELECT COUNT(*) as count 
+    FROM collection c LEFT JOIN object o ON c.object_id = o.object_id
+    WHERE o.label = '${classificationResult}'
+    AND c.user_id = ${req.user.user_id}`;
+
+    const result = await sequelize.query(query, {
+      type: sequelize.QueryTypes.SELECT,
     });
+
+    const count = result[0].count;
+
+    console.log(classificationResult, result, count);
+
+    // If the object isn't already in user's collection
+    if (count === 0) {
+      // Get object_id from object table, using the label from classificationResult
+      const objectId = await object.findOne({
+        raw: true,
+        attributes: ['object_id'],
+        where: { label: classificationResult },
+      });
+      console.log(objectId, objectId.object_id);
+
+      // Insert the data to collection table
+      const newCollection = await collection.create({
+        user_id: req.user.user_id,
+        object_id: objectId.object_id,
+      });
+
+      // If the insert to collection table is successful
+      if (newCollection) {
+        // Add new entry to action_completed table
+        const actionId = 1; // New Discovery
+        console.log(actionId); // JGN LUPA HAPUS
+
+        const newActionCompleted = await action_completed.create({
+          user_id: req.user.user_id,
+          action_id: actionId,
+        });
+
+        // Add Streak
+        if (newActionCompleted) {
+          // Check SUM of points collected today
+          const checkActionQuery = `SELECT SUM(at.point_value) as point 
+          FROM action_completed ac LEFT JOIN action_type at ON ac.action_id = at.action_id
+          WHERE ac.user_id = ${req.user.user_id}
+          AND DATE(ac.created_at) = CURDATE()`;
+
+          const checkActionResult = await sequelize.query(checkActionQuery, {
+            type: sequelize.QueryTypes.SELECT,
+          });
+
+          const totalPoint = checkActionResult[0].point;
+
+          console.log(totalPoint);
+
+          // Check if streak is already achieved
+          if (totalPoint >= 100) {
+            const streakQuery = `SELECT COUNT(*) as count
+            FROM action_completed ac
+            WHERE ac.user_id = ${req.user.user_id}
+            AND ac.action_id = 3
+            AND DATE(ac.created_at) = CURDATE()`;
+
+            const isStreakUpdated = await sequelize.query(streakQuery, {
+              type: sequelize.QueryTypes.SELECT,
+            });
+
+            console.log(isStreakUpdated, isStreakUpdated[0].count);
+
+            // Update user streak
+            if (isStreakUpdated[0].count <= 0) {
+              const updatedUserStreak = await user.update(
+                { streak: sequelize.literal('streak + 1') },
+                { where: { user_id: req.user.user_id } },
+              );
+
+              const updateStreakAction = await action_completed.create({
+                user_id: req.user.user_id,
+                action_id: 3,
+              });
+
+              // If update is unsuccessful
+              if (!updatedUserStreak || !updateStreakAction) {
+                res.status(400).json({ msg: 'Unable to update streak' })
+              }
+            }
+          }
+        }
+      }
+    } else {
+      // Add new entry to action_completed table
+      const actionId = 2; // Discovery
+      console.log(actionId); // JGN LUPA HAPUS
+
+      const newActionCompleted = await action_completed.create({
+        user_id: req.user.user_id,
+        action_id: actionId,
+      });
+
+      // Add Streak
+      if (newActionCompleted) {
+        // Check SUM of points collected today
+        const checkActionQuery = `SELECT SUM(at.point_value) as point 
+        FROM action_completed ac LEFT JOIN action_type at ON ac.action_id = at.action_id
+        WHERE ac.user_id = ${req.user.user_id}
+        AND DATE(ac.created_at) = CURDATE()`;
+
+        const checkActionResult = await sequelize.query(checkActionQuery, {
+          type: sequelize.QueryTypes.SELECT,
+        });
+
+        const totalPoint = checkActionResult[0].point;
+
+        console.log(totalPoint);
+
+        // Check if streak is already achieved
+        if (totalPoint >= 100) {
+          const streakQuery = `SELECT COUNT(*) as count
+          FROM action_completed ac
+          WHERE ac.user_id = ${req.user.user_id}
+          AND ac.action_id = 3
+          AND DATE(ac.created_at) = CURDATE()`;
+
+          const isStreakUpdated = await sequelize.query(streakQuery, {
+            type: sequelize.QueryTypes.SELECT,
+          });
+
+          console.log(isStreakUpdated, isStreakUpdated[0].count);
+
+          // Update user streak
+          if (isStreakUpdated[0].count <= 0) {
+            const updatedUserStreak = await user.update(
+              { streak: sequelize.literal('streak + 1') },
+              { where: { user_id: req.user.user_id } },
+            );
+
+            const updateStreakAction = await action_completed.create({
+              user_id: req.user.user_id,
+              action_id: 3,
+            });
+
+            // If update is unsuccessful
+            if (!updatedUserStreak || !updateStreakAction) {
+              res.status(400).json({ msg: 'Unable to update streak' })
+            }
+          }
+        }
+      }
+    }
+
+    const collectionDetail = await object.findAll({
+      raw: true,
+      attributes: ['full_picture_url', 'name', 'latin', 'short_desc', 'fun_fact'],
+      where: {
+        label: classificationResult,
+      },
+      include: {
+        model: user,
+        attributes: [],
+        where: { user_id: req.user.user_id },
+        through: { attributes: [] },
+      },
+    });
+
+    res.send(collectionDetail);
   }
 };
 
