@@ -31,12 +31,12 @@ const imageClassification = async (path, isFlora) => {
 
   // Branching to select paths and image size
   if (isFlora) {
-    modelPath = 'file://deployment/image-recognition-js/flora_model/flower16_91/model.json';
-    labelPath = './deployment/image-recognition-js/assets/flora_labels.txt';
+    modelPath = 'file://../machine-learning/flora_model/model.json';
+    labelPath = '../machine-learning/labels/flora_labels.txt';
     imageSize = [225, 225];
   } else {
-    modelPath = 'file://deployment/image-recognition-js/fauna_model/model.json';
-    labelPath = './deployment/image-recognition-js/assets/fauna_labels.txt';
+    modelPath = 'file://../machine-learning/fauna_model/model.json';
+    labelPath = '../machine-learning/labels/fauna_labels.txt';
     imageSize = [225, 225];
   }
 
@@ -76,4 +76,4 @@ const imageClassification = async (path, isFlora) => {
   return '';
 };
 
-module.exports = { imageClassification };
+module.exports = imageClassification;
