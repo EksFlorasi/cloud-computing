@@ -16,7 +16,7 @@ const {
   tip,
   collection,
 } = require('../config/database').models;
-// const imageClassification = require('../machine-learning/image-classification');
+const imageClassification = require('../machine-learning/image-classification');
 
 // Show Indonesia Region List
 const showRegions = async (req, res) => {
@@ -377,13 +377,12 @@ const uploadCollection = async (req, res) => {
   const publicUrl = `https://storage.googleapis.com/${bucketName}/${fileName}`;
 
   // Check the type of collection
-  // const { isFlora } = req.body; // If Fauna, isFlora = false
+  const { isFlora } = req.body; // If Fauna, isFlora = false
 
   // Image Classification
-  // const classificationResult = imageClassification(publicUrl, isFlora);
+  const classificationResult = imageClassification(publicUrl, isFlora);
 
   // Check for result's label
-  const classificationResult = 'cat';
   if (classificationResult !== '') {
     const query = `SELECT COUNT(*) as count 
     FROM collection c LEFT JOIN object o ON c.object_id = o.object_id
