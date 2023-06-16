@@ -251,8 +251,6 @@ const userDashboard = async (req, res) => {
     attributes: ['tip_desc'],
   });
 
-  console.log(florTip);
-
   res.send({
     userPoints: userPoints[0].pointCount,
     rank,
@@ -380,10 +378,10 @@ const uploadCollection = async (req, res) => {
   const { isFlora } = req.body; // If Fauna, isFlora = false
 
   // Image Classification
-  const classificationResult = imageClassification(publicUrl, isFlora);
+  const classificationResult = await imageClassification(publicUrl, isFlora);
 
   // Check for result's label
-  if (classificationResult !== '') {
+  if (classificationResult != '') {
     const query = `SELECT COUNT(*) as count 
     FROM collection c LEFT JOIN object o ON c.object_id = o.object_id
     WHERE o.label = '${classificationResult}'
@@ -395,8 +393,6 @@ const uploadCollection = async (req, res) => {
 
     const count = result[0].count;
 
-    console.log(classificationResult, result, count);
-
     // If the object isn't already in user's collection
     if (count === 0) {
       // Get object_id from object table, using the label from classificationResult
@@ -405,7 +401,6 @@ const uploadCollection = async (req, res) => {
         attributes: ['object_id'],
         where: { label: classificationResult },
       });
-      console.log(objectId, objectId.object_id);
 
       // Insert the data to collection table
       const newCollection = await collection.create({
@@ -417,7 +412,6 @@ const uploadCollection = async (req, res) => {
       if (newCollection) {
         // Add new entry to action_completed table
         const actionId = 1; // New Discovery
-        console.log(actionId); // JGN LUPA HAPUS
 
         const newActionCompleted = await action_completed.create({
           user_id: req.user.user_id,
@@ -438,8 +432,6 @@ const uploadCollection = async (req, res) => {
 
           const totalPoint = checkActionResult[0].point;
 
-          console.log(totalPoint);
-
           // Check if streak is already achieved
           if (totalPoint >= 100) {
             const streakQuery = `SELECT COUNT(*) as count
@@ -451,8 +443,6 @@ const uploadCollection = async (req, res) => {
             const isStreakUpdated = await sequelize.query(streakQuery, {
               type: sequelize.QueryTypes.SELECT,
             });
-
-            console.log(isStreakUpdated, isStreakUpdated[0].count);
 
             // Update user streak
             if (isStreakUpdated[0].count <= 0) {
@@ -477,7 +467,6 @@ const uploadCollection = async (req, res) => {
     } else {
       // Add new entry to action_completed table
       const actionId = 2; // Discovery
-      console.log(actionId); // JGN LUPA HAPUS
 
       const newActionCompleted = await action_completed.create({
         user_id: req.user.user_id,
@@ -498,8 +487,6 @@ const uploadCollection = async (req, res) => {
 
         const totalPoint = checkActionResult[0].point;
 
-        console.log(totalPoint);
-
         // Check if streak is already achieved
         if (totalPoint >= 100) {
           const streakQuery = `SELECT COUNT(*) as count
@@ -511,8 +498,6 @@ const uploadCollection = async (req, res) => {
           const isStreakUpdated = await sequelize.query(streakQuery, {
             type: sequelize.QueryTypes.SELECT,
           });
-
-          console.log(isStreakUpdated, isStreakUpdated[0].count);
 
           // Update user streak
           if (isStreakUpdated[0].count <= 0) {
@@ -550,6 +535,8 @@ const uploadCollection = async (req, res) => {
     });
 
     res.send(collectionDetail);
+  } else {
+    return res.status(404).json({ msg: 'Error' });
   }
 };
 

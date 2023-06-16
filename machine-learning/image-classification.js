@@ -30,13 +30,13 @@ const imageClassification = async (path, isFlora) => {
   let imageSize = [];
 
   // Branching to select paths and image size
-  if (isFlora) {
-    modelPath = 'file://../machine-learning/flora_model/model.json';
-    labelPath = '../machine-learning/labels/flora_labels.txt';
+  if (isFlora === 'yes') {
+    modelPath = 'file://../cloud-computing/machine-learning/flora_model/model.json';
+    labelPath = '../cloud-computing/machine-learning/labels/flora_labels.txt';
     imageSize = [225, 225];
   } else {
-    modelPath = 'file://../machine-learning/fauna_model/model.json';
-    labelPath = '../machine-learning/labels/fauna_labels.txt';
+    modelPath = 'file://../cloud-computing/machine-learning/fauna_model/model.json';
+    labelPath = '../cloud-computing/machine-learning/labels/fauna_labels.txt';
     imageSize = [225, 225];
   }
 
