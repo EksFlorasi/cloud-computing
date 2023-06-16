@@ -354,7 +354,6 @@ const uploadCollection = async (req, res) => {
   // Define the destination directory to store the file temporarily
   const storage = new Storage({
     projectId: 'eksflorasi-dev-c23-pr499',
-    keyFilename: './eksflorasi-dev-c23-pr499-b9cc1e29a0f4.json',
   });
 
   // Set bucket name
