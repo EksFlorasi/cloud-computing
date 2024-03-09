@@ -17,6 +17,7 @@ const {
   collection,
 } = require('../config/database').models;
 const imageClassification = require('../machine-learning/image-classification');
+const { response } = require('express');
 
 // Show Indonesia Region List
 const showRegions = async (req, res) => {
@@ -58,6 +59,13 @@ const registerUser = async (req, res) => {
   // Check if password and confirm password match
   if (req.body.password !== req.body.confirm) return res.status(400).json({ msg: 'Password and Confirm Password should match' });
 
+  // Password validation
+  // At least 8 characters,
+  // includes at least one lowercase alphabet, one uppercase alphabet, and one number
+  const passwordValidation = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])[a-zA-Z0-9]{8,}$/;
+
+  if (passwordValidation.test(req.body.password) !== true) return res.status(400).json({ msg: 'Password should contain at least 8 characters and include 1 lowercase letter, 1 uppercase letter, and 1 number' });
+
   // Hash password
   const salt = await bcrypt.genSalt();
   const hashpassword = await bcrypt.hash(req.body.password, salt);
@@ -74,6 +82,7 @@ const registerUser = async (req, res) => {
       // Find the user id in database
       const userInfo = await user.findOne({
         raw: true,
+        attributes: ['user_id', 'name', 'email', 'avatar_id', 'location_id'],
         where: {
           email: req.body.email,
         },
@@ -84,7 +93,7 @@ const registerUser = async (req, res) => {
       return res.status(201).json({ msg: 'Successfully registered', token });
     }
   } catch (error) {
-    return res.status(400).json({ msg: error.message });
+    return res.status(500).json({ msg: 'There is a problem connecting to the server. Please try again later' });
   }
 };
 
@@ -94,18 +103,28 @@ const userSignin = async (req, res) => {
   if (req.body.email.trim() === '' || req.body.password.trim() === '') return res.status(400).json({ msg: 'Email or password must not be empty' });
 
   // Check if the user with that email exists
-  const userData = await user.findOne({
+  const checkUserSignIn = await user.findOne({
     raw: true,
+    attributes: ['email', 'password'],
     where: {
       email: req.body.email,
     },
   });
 
-  if (!userData) return res.status(400).json({ msg: 'Email is incorrect' });
+  if (!checkUserSignIn) return res.status(400).json({ msg: 'Email is incorrect' });
 
   // Check password
-  const passwordMatch = await bcrypt.compare(req.body.password, userData.password);
+  const passwordMatch = await bcrypt.compare(req.body.password, checkUserSignIn.password);
   if (passwordMatch === false) return res.status(401).send({ msg: 'Email or Password is incorrect' });
+
+  // Get user_id from DB for token
+  const userData = await user.findOne({
+    raw: true,
+    attributes: ['user_id', 'name', 'email', 'avatar_id', 'location_id'],
+    where: {
+      email: req.body.email,
+    },
+  });
 
   // Generate token
   const token = generateAccessToken(userData);
@@ -122,6 +141,7 @@ const userProfile = async (req, res) => {
     ],
     where: {
       user_id: req.user.user_id,
+      email: req.user.email,
     },
     include: [
       {
@@ -145,42 +165,122 @@ const userEditProfile = async (req, res) => {
   // Check if any fields are empty
   if (!req.body.name
     || !req.body.email
+    || !req.body.password
+    || !req.body.confirm
     || !req.body.avatar_id
     || !req.body.location_id) return res.status(400).json({ msg: 'All fields should not be empty' });
 
-  // Check if email is already in database and not the previous email address
-  const checkEmail = await user.findOne({
+  // Check Email
+  // Check DB if the email already existed
+  const checkEmailUsed = await user.findOne({
     raw: true,
+    attributes: ['email'],
     where: {
       email: req.body.email,
     },
   });
 
-  if (checkEmail.length !== 0 && checkEmail.user_id !== req.user.user_id) return res.status(403).json({ msg: 'Cannot edit email' });
+  if (checkEmailUsed) {
+    // If the email is already used,
+    // Check if the email is not the user's previous email
+    if (checkEmailUsed.email !== req.user.email) {
+      return res.status(400).json({ msg: 'This email is unavailable, please insert another email' });
+    }
+  }
 
-  // Find the user data from token
-  const updateUser = await user.update(
-    {
-      name: req.body.name,
-      email: req.body.email,
-      avatar_id: req.body.avatar_id,
-      location_id: req.body.location_id,
-    },
-    {
-      where: { user_id: req.user.user_id },
-    },
-  );
+  // Check Password
+  // Check if password and confirm password match
+  if (req.body.password !== req.body.confirm) return res.status(400).json({ msg: 'Password and Confirm Password should match' });
 
-  // Check if email is already updated
-  if (updateUser) {
-    const updatedUser = await user.findOne({
-      raw: true,
-      where: { user_id: req.user.user_id },
-    });
-    const newToken = generateAccessToken(updatedUser);
-    res.status(200).json({ msg: 'User updated', newToken });
+  // Password validation
+  // At least 8 characters,
+  // includes at least one lowercase alphabet, one uppercase alphabet, and one number
+  const passwordValidation = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])[a-zA-Z0-9]{8,}$/;
+
+  if (passwordValidation.test(req.body.password) !== true) return res.status(400).json({ msg: 'Password should contain at least 8 characters and include 1 lowercase letter, 1 uppercase letter, and 1 number' });
+
+  // Get user's password from database
+  const checkPassword = await user.findOne({
+    raw: true,
+    where: {
+      user_id: req.user.user_id,
+      email: req.user.email,
+    },
+  });
+
+  // Check if old password and new password is the same
+  const passwordMatchEditUser = await bcrypt.compare(req.body.password, checkPassword.password);
+
+  if (passwordMatchEditUser === true) {
+    // If old password and new password is the same,
+    // update user data without the password
+    const updateUser = await user.update(
+      {
+        name: req.body.name,
+        email: req.body.email,
+        avatar_id: req.body.avatar_id,
+        location_id: req.body.location_id,
+      },
+      {
+        where: { user_id: req.user.user_id },
+      },
+    );
+
+    // Check if email is already updated
+    if (updateUser) {
+      const updatedUser = await user.findOne({
+        raw: true,
+        attributes: ['user_id', 'name', 'email', 'avatar_id', 'location_id'],
+        where: {
+          user_id: req.user.user_id,
+          name: req.body.name,
+          email: req.body.email,
+          avatar_id: req.body.avatar_id,
+          location_id: req.body.location_id,
+        },
+      });
+      const newToken = generateAccessToken(updatedUser);
+      res.status(200).json({ msg: 'User updated', newToken });
+    } else {
+      res.status(500).json({ msg: 'User is not updated' });
+    }
   } else {
-    res.status(400).json({ msg: 'User is not updated' });
+    // If old password and new password is not the same,
+    // hash new password and update user data with the password
+    const salt = await bcrypt.genSalt();
+    const hashnewpassword = await bcrypt.hash(req.body.password, salt);
+    const updateUser = await user.update(
+      {
+        name: req.body.name,
+        email: req.body.email,
+        password: hashnewpassword,
+        avatar_id: req.body.avatar_id,
+        location_id: req.body.location_id,
+      },
+      {
+        where: { user_id: req.user.user_id },
+      },
+    );
+
+    // Check if email is already updated
+    if (updateUser) {
+      const updatedUser = await user.findOne({
+        raw: true,
+        attributes: ['user_id', 'name', 'email', 'avatar_id', 'location_id'],
+        where: {
+          user_id: req.user.user_id,
+          name: req.body.name,
+          email: req.body.email,
+          password: hashnewpassword,
+          avatar_id: req.body.avatar_id,
+          location_id: req.body.location_id,
+        },
+      });
+      const newToken = generateAccessToken(updatedUser);
+      res.status(200).json({ msg: 'User updated', newToken });
+    } else {
+      res.status(500).json({ msg: 'User is not updated' });
+    }
   }
 };
 
@@ -262,7 +362,7 @@ const userDashboard = async (req, res) => {
 
 // Rank
 const userRank = async (req, res) => {
-  // Show user's total points and rank
+  // Show users' total points and rank
   const [results, metadata] = await sequelize.query(
     `SELECT u.user_id, u.name, a.avatar_url, act.total_point
     FROM user u LEFT JOIN 
@@ -321,7 +421,7 @@ const getCollection = async (req, res) => {
 
 // Get Collection Detail
 const getCollectionDetail = async (req, res) => {
-  // Get all collection associated with user
+  // Get all collection associated with user with the details
   const collectionDetail = await object.findAll({
     raw: true,
     attributes: ['object_id', 'full_picture_url', 'name', 'latin', 'short_desc', 'fun_fact'],
