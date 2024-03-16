@@ -76,9 +76,9 @@ CREATE TABLE `avatar` (
 --
 
 INSERT INTO `avatar` (`avatar_id`, `avatar_url`, `created_at`, `updated_at`) VALUES
-(1, 'https://storage.googleapis.com/eksflorasi-user-avatar/bunny-avatar.png', '2023-06-16 13:47:53', '2023-06-16 13:47:53'),
-(2, 'https://storage.googleapis.com/eksflorasi-user-avatar/dog-avatar.png', '2023-06-16 13:47:53', '2023-06-16 13:47:53'),
-(3, 'https://storage.googleapis.com/eksflorasi-user-avatar/hamster-avatar.png', '2023-06-16 13:47:53', '2023-06-16 13:47:53');
+(1, 'https://storage.cloud.google.com/eksflorasi-user-avatar/bunny-avatar.png', '2023-06-16 13:47:53', '2023-06-16 13:47:53'),
+(2, 'https://storage.cloud.google.com/eksflorasi-user-avatar/dog-avatar.png', '2023-06-16 13:47:53', '2023-06-16 13:47:53'),
+(3, 'https://storage.cloud.google.com/eksflorasi-user-avatar/hamster-avatar.png', '2023-06-16 13:47:53', '2023-06-16 13:47:53');
 
 -- --------------------------------------------------------
 
