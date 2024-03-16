@@ -452,13 +452,10 @@ const uploadCollection = async (req, res) => {
   } = req.file;
 
   // Define the destination directory to store the file temporarily
-  const storage = new Storage({
-    projectId: 'eksflorasi-dev-c23-pr499',
-    keyFilename: './keys/eksflorasi-dev-c23-pr499-b9cc1e29a0f4.json',
-  });
+  const storage = new Storage();
 
   // Set bucket name
-  const bucketName = 'user-upload-collection';
+  const bucketName = process.env.USER_UPLOAD_COLLECTION_BUCKET;
 
   // Generate a new unique file name
   const fileName = `${Date.now()}-${req.user.name}-${originalname}`;
@@ -472,7 +469,7 @@ const uploadCollection = async (req, res) => {
     },
   });
 
-  const publicUrl = `https://storage.googleapis.com/${bucketName}/${fileName}`;
+  const publicUrl = `https://storage.cloud.google.com/${bucketName}/${fileName}`;
 
   // Check the type of collection
   const { isFlora } = req.body; // If Fauna, isFlora = false
