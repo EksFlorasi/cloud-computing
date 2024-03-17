@@ -31,11 +31,11 @@ const imageClassification = async (path, isFlora) => {
 
   // Branching to select paths and image size
   if (isFlora === 'yes') {
-    modelPath = './flora_model/model.json';
+    modelPath = 'file://flora_model/model.json';
     labelPath = './labels/flora_labels.txt';
     imageSize = [225, 225];
   } else {
-    modelPath = './fauna_model/model.json';
+    modelPath = 'file://fauna_model/model.json';
     labelPath = './labels/fauna_labels.txt';
     imageSize = [225, 225];
   }
