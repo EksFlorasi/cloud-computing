@@ -469,7 +469,7 @@ const uploadCollection = async (req, res) => {
     },
   });
 
-  const publicUrl = `https://storage.cloud.google.com/${bucketName}/${fileName}`;
+  const publicUrl = `https://storage.googleapis.com/${bucketName}/${fileName}`;
 
   // Check the type of collection
   const { isFlora } = req.body; // If Fauna, isFlora = false
