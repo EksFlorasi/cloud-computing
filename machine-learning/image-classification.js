@@ -67,7 +67,7 @@ const imageClassification = async (path, isFlora) => {
     })).sort((a, b) => b.probability - a.probability).slice(0, 3);
 
   // for debugging
-  // console.log(top3)
+  console.log(top3);
 
   // Branch to determine final result
   if (top3[0].probability >= probabilityThreshold) {
