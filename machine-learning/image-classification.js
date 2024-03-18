@@ -32,7 +32,7 @@ const imageClassification = async (path, isFlora) => {
   // Branching to select paths and image size
   if (isFlora === 'yes') {
     modelPath = 'file://../app/machine-learning/flora_model/model.json';
-    labelPath = './app/machine-learning/labels/flora-labels.txt';
+    labelPath = '../app/machine-learning/labels/flora-labels.txt';
     imageSize = [225, 225];
   } else {
     modelPath = 'file://../app/machine-learning/fauna_model/model.json';
@@ -42,7 +42,7 @@ const imageClassification = async (path, isFlora) => {
 
   // Load model and label based on chosen classification
   const chosenModel = await tf.loadLayersModel(modelPath);
-  const chosenLabel = fs.readFileSync(labelPath, 'utf-8').split('\r\n');
+  const chosenLabel = fs.readFileSync(labelPath, 'utf-8').split('\n');
 
   // Get image from file system
   let imgBuf = await readImage(path);
