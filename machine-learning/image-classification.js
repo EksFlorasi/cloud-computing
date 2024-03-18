@@ -32,11 +32,11 @@ const imageClassification = async (path, isFlora) => {
   // Branching to select paths and image size
   if (isFlora === 'yes') {
     modelPath = 'file://../app/machine-learning/flora_model/model.json';
-    labelPath = 'file://../app/machine-learning/labels/flora_labels.txt';
+    labelPath = '../app/machine-learning/labels/flora_labels.txt';
     imageSize = [225, 225];
   } else {
     modelPath = 'file://../app/machine-learning/fauna_model/model.json';
-    labelPath = 'file://../app/machine-learning/labels/fauna_labels.txt';
+    labelPath = '../app/machine-learning/labels/fauna_labels.txt';
     imageSize = [225, 225];
   }
 
