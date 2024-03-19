@@ -472,7 +472,15 @@ const uploadCollection = async (req, res) => {
   const publicUrl = `https://storage.googleapis.com/${bucketName}/${fileName}`;
 
   // Check the type of collection
-  const { isFlora } = req.body; // If Fauna, isFlora = false
+  const { type } = req.body;
+
+  // If Fauna, isFlora = false
+  let isFlora = null;
+  if (type === 'flora') {
+    isFlora = 'yes';
+  } else if (type === 'fauna') {
+    isFlora = 'no';
+  }
 
   // Image Classification
   const classificationResult = await imageClassification(publicUrl, isFlora);
@@ -555,7 +563,7 @@ const uploadCollection = async (req, res) => {
 
               // If update is unsuccessful
               if (!updatedUserStreak || !updateStreakAction) {
-                res.status(400).json({ msg: 'Unable to update streak' })
+                res.status(500).json({ msg: 'Unable to update streak' })
               }
             }
           }
@@ -610,7 +618,7 @@ const uploadCollection = async (req, res) => {
 
             // If update is unsuccessful
             if (!updatedUserStreak || !updateStreakAction) {
-              res.status(400).json({ msg: 'Unable to update streak' })
+              res.status(500).json({ msg: 'Unable to update streak' })
             }
           }
         }
@@ -633,7 +641,7 @@ const uploadCollection = async (req, res) => {
 
     res.send(collectionDetail);
   } else {
-    return res.status(404).json({ msg: 'Error' });
+    return res.status(500).json({ msg: 'Something went wrong, please try again later' });
   }
 };
 
