@@ -486,7 +486,7 @@ const uploadCollection = async (req, res) => {
   const classificationResult = await imageClassification(publicUrl, isFlora);
 
   // Check for result's label
-  if (classificationResult != '') {
+  if (classificationResult !== '') {
     const query = `SELECT COUNT(*) as count 
     FROM collection c LEFT JOIN object o ON c.object_id = o.object_id
     WHERE o.label = '${classificationResult}'
