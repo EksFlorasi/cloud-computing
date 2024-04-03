@@ -1,9 +1,9 @@
 const express = require('express');
 const multer = require('multer');
 const {
-  registerUser,
+  userSignUp,
   getCollection,
-  userSignin,
+  userLogin,
   showRegions,
   getCollectionDetail,
   showAvatars,
@@ -23,11 +23,11 @@ router.get('/references/locations', showRegions);
 // Show user list of avatars
 router.get('/references/avatars', showAvatars);
 
-// Register user
-router.post('/auth/register', registerUser);
+// User Sign Up
+router.post('/auth/signup', userSignUp);
 
-// Login user
-router.post('/auth/signin', userSignin);
+// User Login
+router.post('/auth/login', userLogin);
 
 // Get user profile
 router.get('/profile', authenticateToken, userProfile);

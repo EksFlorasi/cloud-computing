@@ -39,8 +39,8 @@ const showAvatars = async (req, res) => {
   res.send({ avatars: avatarList });
 };
 
-// User Registration
-const registerUser = async (req, res) => {
+// User Sign Up
+const userSignUp = async (req, res) => {
   // Check if there's an empty field
   if (!req.body.name
     || !req.body.email
@@ -90,7 +90,7 @@ const registerUser = async (req, res) => {
 
       // Generate token
       const token = generateAccessToken(userInfo);
-      return res.status(201).json({ msg: 'Successfully registered', token });
+      return res.status(201).json({ msg: 'Account successfully created', token });
     }
   } catch (error) {
     return res.status(500).json({ msg: 'There is a problem connecting to the server. Please try again later' });
@@ -98,12 +98,12 @@ const registerUser = async (req, res) => {
 };
 
 // User Login
-const userSignin = async (req, res) => {
+const userLogin = async (req, res) => {
   // Check if email or password fields are empty
   if (req.body.email.trim() === '' || req.body.password.trim() === '') return res.status(400).json({ msg: 'Email or password must not be empty' });
 
   // Check if the user with that email exists
-  const checkUserSignIn = await user.findOne({
+  const checkUserLogin = await user.findOne({
     raw: true,
     attributes: ['email', 'password'],
     where: {
@@ -111,10 +111,10 @@ const userSignin = async (req, res) => {
     },
   });
 
-  if (!checkUserSignIn) return res.status(400).json({ msg: 'Email is incorrect' });
+  if (!checkUserLogin) return res.status(400).json({ msg: 'Email is incorrect' });
 
   // Check password
-  const passwordMatch = await bcrypt.compare(req.body.password, checkUserSignIn.password);
+  const passwordMatch = await bcrypt.compare(req.body.password, checkUserLogin.password);
   if (passwordMatch === false) return res.status(401).send({ msg: 'Email or Password is incorrect' });
 
   // Get user_id from DB for token
@@ -648,8 +648,8 @@ const uploadCollection = async (req, res) => {
 module.exports = {
   showRegions,
   showAvatars,
-  registerUser,
-  userSignin,
+  userSignUp,
+  userLogin,
   userProfile,
   userEditProfile,
   userDashboard,
