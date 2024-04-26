@@ -352,11 +352,11 @@ const userDashboard = async (req, res) => {
   });
 
   res.send({
-    userPoints: userPoints[0].pointCount,
+    user_points: userPoints[0].pointCount,
     rank,
     ...userInformation,
-    userStreak: userStreak.streak,
-    florTip: florTip[0].tip_desc,
+    user_streak: userStreak.streak,
+    flor_tip: florTip[0].tip_desc,
   });
 };
 
