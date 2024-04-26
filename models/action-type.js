@@ -9,7 +9,7 @@ module.exports = function (sequelize, DataTypes) {
         autoIncrement: true,
       },
       action_name: {
-        type: DataTypes.STRING(255),
+        type: DataTypes.STRING(32),
         allowNull: false,
       },
       point_value: {

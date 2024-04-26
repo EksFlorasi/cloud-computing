@@ -9,11 +9,11 @@ module.exports = function (sequelize, DataTypes) {
         autoIncrement: true,
       },
       name: {
-        type: DataTypes.STRING(255),
+        type: DataTypes.STRING(64),
         allowNull: false,
       },
       email: {
-        type: DataTypes.STRING(255),
+        type: DataTypes.STRING,
         allowNull: false,
         validate: {
           isEmail: true,
@@ -21,7 +21,7 @@ module.exports = function (sequelize, DataTypes) {
         unique: true,
       },
       password: {
-        type: DataTypes.STRING(255),
+        type: DataTypes.STRING,
         allowNull: false,
       },
       streak: {

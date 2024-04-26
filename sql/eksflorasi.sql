@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 16, 2023 at 08:49 AM
+-- Generation Time: Apr 26, 2024 at 11:32 AM
 -- Server version: 10.4.22-MariaDB
 -- PHP Version: 7.4.27
 
@@ -43,7 +43,7 @@ CREATE TABLE `action_completed` (
 
 CREATE TABLE `action_type` (
   `action_id` int(11) NOT NULL,
-  `action_name` varchar(255) NOT NULL,
+  `action_name` varchar(32) NOT NULL,
   `point_value` int(11) NOT NULL,
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL
@@ -101,7 +101,7 @@ CREATE TABLE `collection` (
 
 CREATE TABLE `location` (
   `location_id` int(11) NOT NULL,
-  `location_name` varchar(255) NOT NULL,
+  `location_name` varchar(64) NOT NULL,
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -158,14 +158,14 @@ INSERT INTO `location` (`location_id`, `location_name`, `created_at`, `updated_a
 
 CREATE TABLE `object` (
   `object_id` int(11) NOT NULL,
-  `label` varchar(255) NOT NULL,
-  `type` varchar(255) NOT NULL,
-  `full_picture_url` varchar(1024) NOT NULL,
-  `mini_picture_url` varchar(1024) NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `latin` varchar(255) NOT NULL,
-  `short_desc` varchar(1024) NOT NULL,
-  `fun_fact` varchar(1024) NOT NULL,
+  `label` varchar(32) NOT NULL,
+  `type` varchar(16) NOT NULL,
+  `full_picture_url` varchar(255) NOT NULL,
+  `mini_picture_url` varchar(255) NOT NULL,
+  `name` varchar(64) NOT NULL,
+  `latin` varchar(64) NOT NULL,
+  `short_desc` text NOT NULL,
+  `fun_fact` text NOT NULL,
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -178,7 +178,7 @@ CREATE TABLE `object` (
 
 CREATE TABLE `tip` (
   `tip_id` int(11) NOT NULL,
-  `tip_desc` varchar(1024) NOT NULL,
+  `tip_desc` text NOT NULL,
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -189,9 +189,9 @@ CREATE TABLE `tip` (
 
 INSERT INTO `tip` (`tip_id`, `tip_desc`, `created_at`, `updated_at`) VALUES
 (1, 'Please be careful while exploring!', '2023-06-16 13:47:36', '2023-06-16 13:47:36'),
-(2, 'Don\'t go to dangerous places :(', '2023-06-16 13:47:36', '2023-06-16 13:47:36'),
+(2, 'Don\'t go to dangerous places!', '2023-06-16 13:47:36', '2023-06-16 13:47:36'),
 (3, ':D', '2023-06-16 13:47:36', '2023-06-16 13:47:36'),
-(4, 'Miaw! Miaw Miaw :3', '2023-06-16 13:47:36', '2023-06-16 13:47:36'),
+(4, 'Meow! Meow Meow :3', '2023-06-16 13:47:36', '2023-06-16 13:47:36'),
 (5, 'Remember to drink water!', '2023-06-16 13:47:36', '2023-06-16 13:47:36'),
 (6, 'Approach animals carefully!', '2023-06-16 13:47:36', '2023-06-16 13:47:36');
 
@@ -203,7 +203,7 @@ INSERT INTO `tip` (`tip_id`, `tip_desc`, `created_at`, `updated_at`) VALUES
 
 CREATE TABLE `user` (
   `user_id` int(11) NOT NULL,
-  `name` varchar(255) NOT NULL,
+  `name` varchar(64) NOT NULL,
   `email` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
   `streak` int(11) DEFAULT 0,

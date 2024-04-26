@@ -9,7 +9,7 @@ module.exports = function (sequelize, DataTypes) {
         autoIncrement: true,
       },
       tip_desc: {
-        type: DataTypes.STRING(1024),
+        type: DataTypes.TEXT,
         allowNull: false,
       },
     },

@@ -9,7 +9,7 @@ module.exports = function (sequelize, DataTypes) {
         autoIncrement: true,
       },
       avatar_url: {
-        type: DataTypes.STRING(255),
+        type: DataTypes.STRING,
         allowNull: false,
       },
     },

@@ -9,35 +9,35 @@ module.exports = function (sequelize, DataTypes) {
         autoIncrement: true,
       },
       label: {
-        type: DataTypes.STRING(255),
+        type: DataTypes.STRING(32),
         allowNull: false,
       },
       type: {
-        type: DataTypes.STRING(255),
+        type: DataTypes.STRING(16),
         allowNull: false,
       },
       full_picture_url: {
-        type: DataTypes.STRING(1024),
+        type: DataTypes.STRING,
         allowNull: false,
       },
       mini_picture_url: {
-        type: DataTypes.STRING(1024),
+        type: DataTypes.STRING,
         allowNull: false,
       },
       name: {
-        type: DataTypes.STRING(255),
+        type: DataTypes.STRING(64),
         allowNull: false,
       },
       latin: {
-        type: DataTypes.STRING(255),
+        type: DataTypes.STRING(64),
         allowNull: false,
       },
       short_desc: {
-        type: DataTypes.STRING(1024),
+        type: DataTypes.TEXT,
         allowNull: false,
       },
       fun_fact: {
-        type: DataTypes.STRING(1024),
+        type: DataTypes.TEXT,
         allowNull: false,
       },
     },
