@@ -11,6 +11,7 @@ const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, proces
 
 initModels(sequelize);
 
+// Create table using Sequelize
 // sequelize.sync({ force: true });
 // console.log("All models were synchronized successfully.");
 
