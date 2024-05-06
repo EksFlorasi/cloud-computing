@@ -51,9 +51,4 @@ router.get('/collections/:object_id', authenticateToken, getCollectionDetail);
 const upload = multer();
 router.post('/collections', upload.single('picture'), authenticateToken, uploadCollection);
 
-// Load testing using Loader.io
-router.get('/loaderio-9a54c0b86e1150557230a3c0b1be8b83', function(req, res) { 
-  res.status(200).send('loaderio-9a54c0b86e1150557230a3c0b1be8b83');
-});
-
 module.exports = { router };
