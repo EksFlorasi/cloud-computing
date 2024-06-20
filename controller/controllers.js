@@ -627,7 +627,7 @@ const uploadCollection = async (req, res) => {
 
     const collectionDetail = await object.findAll({
       raw: true,
-      attributes: ['full_picture_url', 'name', 'latin', 'short_desc', 'fun_fact'],
+      attributes: ['object_id', 'full_picture_url', 'name', 'latin', 'short_desc', 'fun_fact'],
       where: {
         label: classificationResult,
       },
